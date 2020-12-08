@@ -15,6 +15,8 @@
       <itemPath>lcd/lcd.c</itemPath>
       <itemPath>lcd/lcd.h</itemPath>
       <itemPath>lcd/main.c</itemPath>
+      <itemPath>lcd/rtc.c</itemPath>
+      <itemPath>lcd/rtc.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

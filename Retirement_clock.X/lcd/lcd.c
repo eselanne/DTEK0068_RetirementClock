@@ -17,7 +17,7 @@ void LCD_init()
     LCD_send_command(0x01);
     _delay_ms(10);
     LCD_send_command(0x06);
-    LCD_send_command(0x0c);
+    LCD_send_command(0x0C);
 }
 
 void LCD_send_command(unsigned char cmnd)
