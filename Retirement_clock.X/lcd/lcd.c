@@ -1,88 +1,73 @@
 /*
- * lcd.c
- *
- * Created: 06-Jan-20 10:02:57
- *  Author: David Prentice
- */ 
-/*** PIN ASSIGNMENTS ***/
-/*
-EN - PC0
-RS - PC1
-D4 - PC4
-D5 - PC5
-D6 - PC6
-D7 - PC7
-*/
+ * Inspiration from :D
+ * https://alselectro.wordpress.com/2017/08/13/avr-self-learning-kit-interfacing-16-x-2-lcd-in-8-bit-mode/
+ */
 
-#define F_CPU   3333333
+#define F_CPU 3333333
 
 #include <avr/io.h>
 #include <util/delay.h>
 #include "lcd.h"
 
-/* INITIALIZATION */
-void lcdInit(void)
+void LCD_init()
 {
-    lcdDir = 0xF3;	                //.kbv LCD port direction as output i.e. PC0/1/4/5/6/7
-    _delay_ms(20);					//LCD power initialization time
-
-    lcdCmd(0x02);						//Initializes LCD in 4-bit mode
-    lcdCmd(0x28);						//Configures LCD in 2-line 4-bit mode and 5x7 matrix
-    lcdCmd(0x0c);						//Display on, cursor off
-    lcdCmd(0x06);						//Increment cursor: shift cursor to right
-    lcdCmd(0x01);						//Clear display screen
+    _delay_ms(10);
+    LCD_send_command(0x38);
+    LCD_send_command(0x0E);
+    LCD_send_command(0x01);
+    _delay_ms(10);
+    LCD_send_command(0x06);
 }
 
-/* FOR CLEARING LCD DISPLAY */
-void lcdClear()
+void LCD_send_command(unsigned char cmnd)
 {
-    lcdCmd(0x01);						//Clear display screen
-    _delay_ms(2);
-    lcdCmd(0x08);						//Clear display without clearing ram content
+    DATA_PORT = cmnd;
+    CNTRL_PORT &= ~(1<< RW_PIN);
+    CNTRL_PORT &= ~(1<< RS_PIN);
+    
+    CNTRL_PORT |= (1<< ENABLE_PIN);
+    _delay_us(2);
+    CNTRL_PORT &= ~(1<< ENABLE_PIN);
+    _delay_us(100);
 }
 
-/* LCD COMMAND MODE */
-void lcdCmd(uint8_t cmnd)
+void LCD_send_data(unsigned char data)
 {
-    //Sending upper nibble since 4-bit
-    lcdPort = (lcdPort & 0x0F) | (cmnd & 0xF0);
-    lcdPort &= ~(1<<RS);					//RS OFF
-    lcdPort |= (1<<EN);					//Set bit in EN
-    _delay_us(1);
-    lcdPort &= ~(1<<EN);					//Clear bit in EN
-    _delay_us(200);
-    //Sending lower nibble
-    lcdPort = (lcdPort &0x0F) | (cmnd <<4);
-    lcdPort |= (1<<EN);
-    _delay_us(1);
-    lcdPort &= ~(1<<EN);
-    _delay_ms(2);
+    DATA_PORT = data;
+    CNTRL_PORT &= ~(1<< RW_PIN);
+    CNTRL_PORT |= (1<< RS_PIN);
+
+    CNTRL_PORT |= (1<< ENABLE_PIN);
+    _delay_us(2);
+    CNTRL_PORT &= ~(1<< ENABLE_PIN);
+    _delay_us(100);
 }
 
-/* ACCEPTING CHARACTERS IN LCD */
-void lcdChar(uint8_t cmnd)
+void LCD_goto(unsigned char y, unsigned char x)
 {
-    //Sending upper nibble since 4-bit
-    lcdPort = (lcdPort & 0x0F) | (cmnd & 0xF0);
-    lcdPort |= (1<<RS);					//.kbv RS ON
-    lcdPort |= (1<<EN);					//Set bit in EN
-    _delay_us(1);
-    lcdPort &= ~(1<<EN);					//Clear bit in EN
-    _delay_us(200);
-    //Sending lower nibble
-    lcdPort = (lcdPort &0x0F) | (cmnd <<4);
-    lcdPort |= (1<<EN);
-    _delay_us(1);
-    lcdPort &= ~(1<<EN);
-    _delay_ms(2);
+    unsigned char firstAddress[] = {0x80,0xC0,0x94,0xD4};
+    LCD_send_command(firstAddress[y-1] + x-1);
+    _delay_ms(10);
 }
 
-/* CONVERTS THE CHARACTER INTO STRING */
-void lcdString(uint8_t *str)
+void LCD_print(char *string)
 {
-    int i;
-    for(i=0; str[i] != 0; i++)
+    while(*string > 0)
     {
-        lcdChar(str[i]);
+        LCD_send_data(*string++);
     }
+}
+
+void LCD_blink()
+{
+    LCD_send_command(0x08);
+    _delay_ms(250);
+    LCD_send_command(0x0C);
+    _delay_ms(250);
+}
+
+void LCD_clear(void)
+{
+    LCD_send_command(0x01);
+    _delay_ms(100);
 }

@@ -1,34 +1,20 @@
 /*
- * lcd.h
- *
- * Created: 06-Jan-20 10:03:28
- *  Author: David Prentice
- */ 
+ * Inspiration from:D
+ * https://alselectro.wordpress.com/2017/08/13/avr-self-learning-kit-interfacing-16-x-2-lcd-in-8-bit-mode/
+ */
 
-#define F_CPU   3333333
+#define DATA_PORT PORTD_OUT
+#define DATA_DDR PORTD_DIR
+#define CNTRL_PORT PORTB_OUT
+#define CNTRL_DDR PORTB_DIR
+#define RS_PIN 4
+#define RW_PIN 5 // doesn't matter, its ground
+#define ENABLE_PIN 3
 
-
-#ifndef LCD_H_
-#define LCD_H_
-
-
-#include <avr/io.h>
-#include <util/delay.h>
-
-//.kbv edit defines to suit your wiring.  Note you MUST connect RW pin to GND
-//  RS  RW  EN  D4  D5  D6  D7
-// PC1 GND PC0 PC4 PC5 PC6 PC7
-
-#define lcdPort PORTC_OUT                   //.kbv Data Output value of PORTC
-#define lcdDir PORTC_DIR                    //.kbv Setting pins as I/O
-#define EN 0            //.kbv ENABLE (EN) pin to PORTC PIN0
-#define RS 1            //.kbv REGISTER SELECT (RS) pin to PORTC PIN1
-
-void lcdInit(void);
-void lcdClear();
-void lcdCmd(uint8_t cmnd);
-void lcdChar(uint8_t cmnd);
-void lcdString(uint8_t *str);
-
-
-#endif /* LCD_H_ */
+void LCD_send_command(unsigned char cmnd);
+void LCD_send_data(unsigned char data);
+void LCD_init(void);
+void LCD_goto(unsigned char y, unsigned char x);
+void LCD_print(char *string);
+void LCD_blink(void);
+void LCD_clear(void);
