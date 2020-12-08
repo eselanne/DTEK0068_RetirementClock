@@ -19,7 +19,9 @@
 
 
 int backlight_counter; //tähän joku parempi ratkasu :D
-int backlight_duration = 5; //default value is 5
+int backlight_duration = 5; //default value is 5 seconds
+int counter = 0;
+char str[16]; //stringi, johon tallennetaan int arvo
 
 int main(void) {   
     
@@ -31,12 +33,12 @@ int main(void) {
 	LCD_clear();
     LCD_init();
 	LCD_goto(1,2);
-	LCD_print("moloclan.fi");
+	LCD_print("Time to RET:");
 	LCD_goto(2,3);
-	LCD_print("16x2 LCD 420");
+	LCD_print("0");
     
-    PORTB.DIRSET = PIN5_bm; //set PB5 as a output
-    PORTB.OUTCLR = PIN5_bm; //turn off backlight
+    PORTF.DIRSET = PIN2_bm; //set PB5 as a output
+    PORTF.OUTCLR = PIN2_bm; //turn off backlight
     PORTF.DIRCLR = PIN6_bm; //set button as a input
     PORTF.PIN6CTRL = PORT_ISC_FALLING_gc; //configured to trigger an interrupt when state goes low (when button is pressed)
     
@@ -47,7 +49,7 @@ int main(void) {
     RTC_init(); 
     
     sei();
- 
+    
 	while(1)
     {
         RTC.PITCTRLA |= RTC_PITEN_bm; //start RTC
@@ -59,23 +61,30 @@ int main(void) {
 //RTC interrupt
 ISR(RTC_PIT_vect) 
 {
+    //testiprinttaus näyttöön, konvertointi INT --> String
+    sprintf(str, "%d", counter);
+	LCD_goto(2,3);
+	LCD_print(str);
+    
     RTC.PITINTFLAGS = RTC_PITEN_bm;//Clear all interrupt flags
     PORTF.OUTTGL = PIN5_bm; //AVR-Led Toggle ON/OFF (TESTAUKSEEN)
+    
     
     if (backlight_counter < backlight_duration && backlight_counter >= 0) {
         backlight_counter++;
     }
     else 
     {
-        PORTB.OUTCLR = PIN5_bm;
+        PORTF.OUTCLR = PIN2_bm;
     }
+    counter++;
 }
 
 //button interrupt
 ISR(PORTF_PORT_vect) 
 {
     PORTF.INTFLAGS = 0xFF;//Clear all interrupt flags
-    PORTB.OUTSET = PIN5_bm;
+    PORTF.OUTSET = PIN2_bm;
     backlight_counter = 0;
     
 }
