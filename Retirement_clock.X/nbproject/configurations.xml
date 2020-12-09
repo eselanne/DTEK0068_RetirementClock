@@ -15,6 +15,8 @@
       <itemPath>lcd/lcd.c</itemPath>
       <itemPath>lcd/lcd.h</itemPath>
       <itemPath>lcd/main.c</itemPath>
+      <itemPath>USART/usart.c</itemPath>
+      <itemPath>USART/usart.h</itemPath>
       <itemPath>lcd/rtc.c</itemPath>
       <itemPath>lcd/rtc.h</itemPath>
     </logicalFolder>
@@ -26,6 +28,7 @@
   </logicalFolder>
   <sourceRootList>
     <Elem>lcd</Elem>
+    <Elem>USART</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -171,7 +174,7 @@
         <property key="communication.activationmode" value="nohv"/>
         <property key="communication.interface" value="updi"/>
         <property key="communication.speed" value="0.500"/>
-        <property key="debugoptions.useswbreakpoints" value="true"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
         <property key="firmware.path"
                   value="Press to browse for a specific firmware version"/>
         <property key="firmware.toolpack"
@@ -191,6 +194,8 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-5fff"/>
         <property key="poweroptions.powerenable" value="false"/>
+        <property key="programmerToGoFilePath"
+                  value="/home/dtek0068/Retirement_Clock/Retirement_clock.X/debug/default/Retirement_clock_ptg"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.preservedataflash" value="false"/>
         <property key="programoptions.preservedataflash.ranges"

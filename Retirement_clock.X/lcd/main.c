@@ -9,21 +9,23 @@
 
 #include <avr/io.h>
 #include <stdio.h>
+#include <string.h>
 #include <util/delay.h>
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
 #include <avr/cpufunc.h>
 #include "lcd.h"
 #include "rtc.h"
+#include "../USART/usart.h"
 
 
 
-int backlight_counter; //tähän joku parempi ratkasu :D
+int backlight_counter; //tï¿½hï¿½n joku parempi ratkasu :D
 int backlight_duration = 5; //default value is 5 seconds
 int counter = 0;
 char str[16]; //stringi, johon tallennetaan int arvo
 
-int main(void) {   
+int main(void) {       
     
     CNTRL_DDR = 0xFF;
 	CNTRL_PORT = 0x00;
@@ -53,15 +55,43 @@ int main(void) {
 	while(1)
     {
         RTC.PITCTRLA |= RTC_PITEN_bm; //start RTC
-        sleep_mode();
-         
-    } 
+        sleep_mode();         
+    }
+    
+    /*
+    char command[MAX_COMMAND_LEN];
+    uint8_t index = 0;
+    char c;
+    
+    USART0_init();
+    
+    while (1)
+    {
+        c = USART0_readChar();
+        USART0_sendChar(c);
+        if(c != '\n' && c != '\r')
+        {
+            command[index++] = c;
+            if(index > MAX_COMMAND_LEN)
+            {
+                index = 0;
+            }
+        }
+        
+        if(c == '\r')
+        {
+            command[index] = '\0';
+            index = 0;
+            USART0_sendChar('\n');
+            executeCommand(command);
+        }
+    }*/
 }
 
 //RTC interrupt
 ISR(RTC_PIT_vect) 
 {
-    //testiprinttaus näyttöön, konvertointi INT --> String
+    //testiprinttaus nï¿½yttï¿½ï¿½n, konvertointi INT --> String
     sprintf(str, "%d", counter);
 	LCD_goto(2,3);
 	LCD_print(str);
