@@ -1,13 +1,14 @@
 /*
  * Inspiration from :D
- * https://alselectro.wordpress.com/2017/08/13/avr-self-learning-kit-interfacing-16-x-2-lcd-in-8-bit-mode/
+ * https://alselectro.wordpress.com/2017/08/13/
+avr-self-learning-kit-interfacing-16-x-2-lcd-in-8-bit-mode/
  */
 
 #define F_CPU 3333333
 
 #include <avr/io.h>
 #include <util/delay.h>
-#include "lcd.h"
+#include "../LCD/lcd.h"
 
 void LCD_init()
 {
