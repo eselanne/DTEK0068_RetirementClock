@@ -7,7 +7,7 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
-#include "lcd.h"
+#include "../LCD/lcd.h"
 
 void LCD_init()
 {

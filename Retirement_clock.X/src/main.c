@@ -14,9 +14,8 @@
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
 #include <avr/cpufunc.h>
-#include "lcd.h"
-#include "rtc.h"
-#include "../USART/usart.h"
+#include "LCD/lcd.h"
+#include "USART/usart.h"
 
 
 

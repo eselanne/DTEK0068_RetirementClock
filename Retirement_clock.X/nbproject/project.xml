@@ -13,8 +13,10 @@
             <sourceEncoding>ISO-8859-1</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>lcd</sourceRootElem>
-                <sourceRootElem>USART</sourceRootElem>
+                <sourceRootElem>src</sourceRootElem>
+                <sourceRootElem>src/LCD</sourceRootElem>
+                <sourceRootElem>src/RTC</sourceRootElem>
+                <sourceRootElem>src/USART</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

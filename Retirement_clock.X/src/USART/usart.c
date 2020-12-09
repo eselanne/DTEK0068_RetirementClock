@@ -1,7 +1,8 @@
 #include <avr/io.h>
 #include <stdio.h>
 #include <string.h>
-#include "usart.h"
+#include "../USART/usart.h"
+#include "../LCD/lcd.h"
 
 void USART0_init(void)
 {

@@ -4,6 +4,8 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>src/USART/usart.h</itemPath>
+      <itemPath>src/LCD/lcd.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -12,13 +14,10 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>lcd/lcd.c</itemPath>
-      <itemPath>lcd/lcd.h</itemPath>
-      <itemPath>lcd/main.c</itemPath>
-      <itemPath>USART/usart.c</itemPath>
-      <itemPath>USART/usart.h</itemPath>
-      <itemPath>lcd/rtc.c</itemPath>
-      <itemPath>lcd/rtc.h</itemPath>
+      <itemPath>src/RTC/rtc.c</itemPath>
+      <itemPath>src/LCD/lcd.c</itemPath>
+      <itemPath>src/USART/usart.c</itemPath>
+      <itemPath>src/main.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -27,8 +26,10 @@
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
-    <Elem>lcd</Elem>
-    <Elem>USART</Elem>
+    <Elem>src</Elem>
+    <Elem>src/LCD</Elem>
+    <Elem>src/RTC</Elem>
+    <Elem>src/USART</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
