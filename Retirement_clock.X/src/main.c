@@ -24,8 +24,8 @@ int backlight_duration = 5; //default value is 5 seconds
 int counter = 0;
 char str[16]; //stringi, johon tallennetaan int arvo
 
-int main(void) {       
-    
+int main(void) 
+{           
     CNTRL_DDR = 0xFF;
 	CNTRL_PORT = 0x00;
 	DATA_DDR = 0xFF;

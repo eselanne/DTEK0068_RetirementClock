@@ -1,3 +1,8 @@
+/*
+ * Sponsored by: 
+ * https://github.com/MicrochipTech/TB3216_Getting_Started_with_USART
+ */
+
 #include <avr/io.h>
 #include <stdio.h>
 #include <string.h>
