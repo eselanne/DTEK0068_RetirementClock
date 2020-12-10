@@ -6,6 +6,8 @@
                    projectFiles="true">
       <itemPath>src/USART/usart.h</itemPath>
       <itemPath>src/LCD/lcd.h</itemPath>
+      <itemPath>src/CMD/cmd.h</itemPath>
+      <itemPath>src/RTC/rtc.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -18,6 +20,7 @@
       <itemPath>src/LCD/lcd.c</itemPath>
       <itemPath>src/USART/usart.c</itemPath>
       <itemPath>src/main.c</itemPath>
+      <itemPath>src/CMD/cmd.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -30,6 +33,7 @@
     <Elem>src/LCD</Elem>
     <Elem>src/RTC</Elem>
     <Elem>src/USART</Elem>
+    <Elem>src/CMD</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -175,7 +179,7 @@
         <property key="communication.activationmode" value="nohv"/>
         <property key="communication.interface" value="updi"/>
         <property key="communication.speed" value="0.500"/>
-        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="debugoptions.useswbreakpoints" value="true"/>
         <property key="firmware.path"
                   value="Press to browse for a specific firmware version"/>
         <property key="firmware.toolpack"
@@ -195,6 +199,8 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-5fff"/>
         <property key="poweroptions.powerenable" value="false"/>
+        <property key="programmerToGoFilePath"
+                  value="/home/dtek0068/Retirement_Clock/Retirement_clock.X/debug/default/Retirement_clock_ptg"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.preservedataflash" value="false"/>
         <property key="programoptions.preservedataflash.ranges"

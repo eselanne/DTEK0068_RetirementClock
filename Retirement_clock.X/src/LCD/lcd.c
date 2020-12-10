@@ -8,17 +8,28 @@ avr-self-learning-kit-interfacing-16-x-2-lcd-in-8-bit-mode/
 
 #include <avr/io.h>
 #include <util/delay.h>
+#include <time.h>
+#include <string.h>
 #include "../LCD/lcd.h"
 
+
 void LCD_init()
-{
+{       
+    CNTRL_DDR = 0xFF; // Set out
+    CNTRL_PORT = 0x00; // Set in
+    DATA_DDR = 0xFF; // Set out
+    DATA_PORT = 0x00; // Set in
+    
     _delay_ms(10);
-    LCD_send_command(0x38);
-    LCD_send_command(0x0E);
-    LCD_send_command(0x01);
+    LCD_send_command(0x38); // Define 16 x 2 LCD
+    LCD_send_command(0x0C); // Display on, cursor off
+    LCD_send_command(0x01); // Clear LCD
     _delay_ms(10);
-    LCD_send_command(0x06);
-    LCD_send_command(0x0C);
+    LCD_send_command(0x06); // Increment cursor
+    
+    // Init backlight
+    PORTF.DIRSET = PIN2_bm;
+    PORTF.OUTCLR = PIN2_bm; // Off   
 }
 
 void LCD_send_command(unsigned char cmnd)
@@ -72,4 +83,40 @@ void LCD_clear(void)
 {
     LCD_send_command(0x01);
     _delay_ms(100);
+}
+
+void LCD_set_view(enum LCD_views view, struct tm *timeinfo)
+{
+    switch (view)
+    {
+        case CLOCK_VIEW:;
+            // Format and copy date to string
+            char time_str[100];
+            char date_str[100];
+            strftime(time_str, sizeof(time_str), "%H:%M:%S", timeinfo);
+            strftime(date_str, sizeof(date_str), "%d.%m.%Y", timeinfo);
+            // Calculate starting indexes
+            uint8_t time_index = ((16 - strlen(time_str)) / 2) + 1;
+            uint8_t date_index = ((16 - strlen(date_str)) / 2) + 1;
+            // Display on LCD
+            LCD_clear();
+            LCD_goto(1,time_index);
+            LCD_print(time_str);
+            LCD_goto(2,date_index);
+            LCD_print(date_str);
+            break;            
+        case COUNTDOWN_VIEW:;
+            // Calculate starting index
+            int8_t start_index = ((16 - strlen("Time to RET:")) / 2) + 1;
+            // Display on LCD
+            LCD_clear();
+            LCD_goto(1, start_index);
+            LCD_print("Time to RET:");
+            LCD_goto(2, 8);
+            LCD_print("0"); // TODO
+            break;
+        case UPTIME_VIEW:;
+            // TODO
+            break;
+    }
 }

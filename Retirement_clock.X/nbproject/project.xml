@@ -17,6 +17,7 @@
                 <sourceRootElem>src/LCD</sourceRootElem>
                 <sourceRootElem>src/RTC</sourceRootElem>
                 <sourceRootElem>src/USART</sourceRootElem>
+                <sourceRootElem>src/CMD</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
