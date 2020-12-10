@@ -41,21 +41,26 @@ int main(void)
         LCD_set_view(CLOCK_VIEW, DATETIME);
 
         c = USART0_readChar(); // Read serial user interface char by char
-        USART0_sendChar(c); // Show the char
-        if(c != '\n' && c != '\r') // Check if enter
+        switch (c)
         {
-            command[index++] = c;
-            if(index > MAX_COMMAND_LEN)
-            {
+            case 127:
+                // Debugging shows that backspace is 127 ??
+                command[--index] = '\0';
+                break;
+            case '\r':
+                // Carriage return
+                command[index] = '\0';
                 index = 0;
-            }
-        }        
-        if(c == '\r')
-        {
-            command[index] = '\0';
-            index = 0;
-            USART0_sendChar('\n');
-            CMD_exec(command);
-        }
+                USART0_sendString("\r\n");
+                CMD_exec(command);
+                break;
+            default:
+                command[index++] = c;
+                if(index > MAX_COMMAND_LEN)
+                {
+                    index = 0;
+                }
+        } 
+        USART0_sendChar(c); // Show the char        
     }
 }

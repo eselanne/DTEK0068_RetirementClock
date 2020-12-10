@@ -9,6 +9,8 @@
 #include "../USART/usart.h"
 #include "../LCD/lcd.h"
 
+static FILE USART_stream = FDEV_SETUP_STREAM(USART0_printChar, NULL, _FDEV_SETUP_WRITE);
+
 void USART0_init(void)
 {
     PORTA.DIR &= ~PIN1_bm;
@@ -17,6 +19,10 @@ void USART0_init(void)
     USART0.BAUD = (uint16_t)USART0_BAUD_RATE(9600);
 
     USART0.CTRLB |= USART_RXEN_bm | USART_TXEN_bm;
+    
+    //stdout = &USART_stream;    
+    //printf("Ready.\n"); not working :(
+    
     USART0_sendString("Ready.\r\n");
 }
 
@@ -27,6 +33,12 @@ void USART0_sendChar(char c)
         ;    
     }
     USART0.TXDATAL = c;
+}
+
+static int USART0_printChar(char c, FILE *stream)
+{
+    USART0_sendChar(c);
+    return 0;
 }
 
 void USART0_sendString(char *str)

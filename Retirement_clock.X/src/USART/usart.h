@@ -7,3 +7,6 @@ void USART0_init(void);
 void USART0_sendChar(char c);
 void USART0_sendString(char *str);
 char USART0_readChar(void);
+
+static int USART0_printChar(char c, FILE *stream);
+static FILE USART_stream;

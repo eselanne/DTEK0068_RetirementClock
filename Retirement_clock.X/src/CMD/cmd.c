@@ -85,10 +85,7 @@ int handle_date_cmd(char *method, char *type, char *date, char *time)
     if(strcmp(method, "GET") == 0)
     {
         char msg_str[100];
-        snprintf(msg_str, sizeof(msg_str), "%s: %d.%d.%d %d:%d:%d\r\n",
-                type, selected_tm->tm_mday, selected_tm->tm_mon,
-                selected_tm->tm_year, selected_tm->tm_hour, 
-                selected_tm->tm_min, selected_tm->tm_sec );
+        strftime(msg_str, sizeof(msg_str), "%d.%m.%Y %H:%M:%S\r\n", selected_tm);
         USART0_sendString(msg_str);
         return 0;
     }
