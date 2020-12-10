@@ -11,6 +11,8 @@ avr-self-learning-kit-interfacing-16-x-2-lcd-in-8-bit-mode/
 #include <time.h>
 #include <string.h>
 #include "../LCD/lcd.h"
+#include "../CMD/cmd.h"
+
 
 
 void LCD_init()
@@ -29,7 +31,9 @@ void LCD_init()
     
     // Init backlight
     PORTF.DIRSET = PIN2_bm;
-    PORTF.OUTCLR = PIN2_bm; // Off   
+    //PORTF.OUTCLR = PIN2_bm; // Off
+    PORTF.OUTSET = PIN2_bm; // On
+
 }
 
 void LCD_send_command(unsigned char cmnd)
@@ -60,7 +64,7 @@ void LCD_goto(unsigned char y, unsigned char x)
 {
     unsigned char firstAddress[] = {0x80,0xC0,0x94,0xD4};
     LCD_send_command(firstAddress[y-1] + x-1);
-    _delay_ms(10);
+    //_delay_ms(2);
 }
 
 void LCD_print(char *string)
@@ -71,18 +75,10 @@ void LCD_print(char *string)
     }
 }
 
-void LCD_blink()
-{
-    LCD_send_command(0x08);
-    _delay_ms(250);
-    LCD_send_command(0x0C);
-    _delay_ms(250);
-}
-
 void LCD_clear(void)
 {
     LCD_send_command(0x01);
-    _delay_ms(100);
+    _delay_ms(2);
 }
 
 void LCD_set_view(enum LCD_views view, struct tm *timeinfo)
@@ -119,4 +115,10 @@ void LCD_set_view(enum LCD_views view, struct tm *timeinfo)
             // TODO
             break;
     }
+}
+
+void LCD_update_view()
+{
+	// TODO instead of CLOCK_VIEW use ACTIVE_VIEW ?
+    LCD_set_view(CLOCK_VIEW, DATETIME);
 }

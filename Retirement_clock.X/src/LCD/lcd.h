@@ -21,3 +21,4 @@ void LCD_print(char *string);
 void LCD_blink(void);
 void LCD_clear(void);
 void LCD_set_view(enum LCD_views view, struct tm *timeinfo);
+void LCD_update_view();

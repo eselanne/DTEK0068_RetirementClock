@@ -27,10 +27,10 @@ int main(void)
 {     
     // Init stuff
     LCD_init();	
-    RTC_init();
-    CMD_init();
-    LCD_set_view(CLOCK_VIEW, DATETIME); // Set some default time
+    CMD_init(); // Just sets some default datetimes
+    LCD_set_view(CLOCK_VIEW, DATETIME);
     USART0_init();
+    RTC_init();
 
     char command[MAX_COMMAND_LEN];
     uint8_t index = 0;
@@ -38,13 +38,12 @@ int main(void)
    
     while (1)
     {
-        LCD_set_view(CLOCK_VIEW, DATETIME);
-
         c = USART0_readChar(); // Read serial user interface char by char
         switch (c)
         {
+        	// TODO handle arrows here ?
             case 127:
-                // Debugging shows that backspace is 127 ??
+                // Backspace
                 command[--index] = '\0';
                 break;
             case '\r':

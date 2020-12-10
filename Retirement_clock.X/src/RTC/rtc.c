@@ -15,6 +15,7 @@
 #include <avr/interrupt.h>
 #include <avr/cpufunc.h>
 #include "../LCD/lcd.h"
+#include "../CMD/cmd.h"
 #include "rtc.h"
 
 
@@ -29,61 +30,26 @@ void RTC_init()
     PORTF.PIN6CTRL = PORT_ISC_FALLING_gc; //configured to trigger an interrupt when state goes low (when button is pressed)
     PORTF.DIRSET = PIN5_bm; //set LED as a output (TESTAUKSEEN)
     
-    uint8_t temp;
-    
-    /* Initialize 32.768kHz Oscillator: */
-    /* Disable oscillator: */
-    temp = CLKCTRL.XOSC32KCTRLA;
-    temp &= ~CLKCTRL_ENABLE_bm;
-    /* Writing to protected register */
-    ccp_write_io((void*)&CLKCTRL.XOSC32KCTRLA, temp);
-    
-    while(CLKCTRL.MCLKSTATUS & CLKCTRL_XOSC32KS_bm)
-    {
-        ; /* Wait until XOSC32KS becomes 0 */
-    }
-    
-    /* SEL = 0 (Use External Crystal): */
-    temp = CLKCTRL.XOSC32KCTRLA;
-    temp &= ~CLKCTRL_SEL_bm;
-    /* Writing to protected register */
-    ccp_write_io((void*)&CLKCTRL.XOSC32KCTRLA, temp);
-    
-    /* Enable oscillator: */
-    temp = CLKCTRL.XOSC32KCTRLA;
-    temp |= CLKCTRL_ENABLE_bm;
-    /* Writing to protected register */
-    ccp_write_io((void*)&CLKCTRL.XOSC32KCTRLA, temp);
-    
-    /* Initialize RTC: */
-    while (RTC.STATUS > 0)
-    {
-        ; /* Wait for all register to be synchronized */
-    }
-
-    /* 32.768kHz External Crystal Oscillator (XOSC32K) */
-    RTC.CLKSEL = RTC_CLKSEL_TOSC32K_gc;
-
     /* Run in debug: enabled */
     RTC.DBGCTRL = RTC_DBGRUN_bm;
     
-    RTC.PITINTCTRL = RTC_PI_bm; /* Periodic Interrupt: enabled */
-    
-    RTC.PITCTRLA = RTC_PERIOD_CYC32768_gc; /* RTC Clock Cycles 32768 */
-             //    | RTC_PITEN_bm; /* Enable: enabled */
+    RTC.PITINTCTRL = RTC_PI_bm; /* Periodic Interrupt: enabled */    
+    RTC.PITCTRLA = RTC_PERIOD_CYC32768_gc /* RTC Clock Cycles 32768 */
+                 | RTC_PITEN_bm; /* Enable: enabled */
     
     sei(); // Enable interrupt
-    
-    RTC.PITCTRLA |= RTC_PITEN_bm; // Start RTC
 }
 
 //RTC interrupt
 ISR(RTC_PIT_vect) 
 {
+    CMD_incr_one_sec(); // Increments relevant dates by 1 sec
+    LCD_update_view();
+    
     //testiprinttaus n�ytt��n, konvertointi INT --> String
-    sprintf(str, "%d", counter);
-	LCD_goto(2,3);
-	LCD_print(str);
+    //sprintf(str, "%d", counter);
+	//LCD_goto(2,3);
+	//LCD_print(str);
     
     RTC.PITINTFLAGS = RTC_PITEN_bm;//Clear all interrupt flags
     PORTF.OUTTGL = PIN5_bm; //AVR-Led Toggle ON/OFF (TESTAUKSEEN)
@@ -94,7 +60,7 @@ ISR(RTC_PIT_vect)
     }
     else 
     {
-        PORTF.OUTCLR = PIN2_bm;
+        //PORTF.OUTCLR = PIN2_bm;
     }
     counter++;
 }
