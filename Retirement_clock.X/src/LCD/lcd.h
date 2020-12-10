@@ -6,6 +6,7 @@
 #define RW_PIN 5 // doesn't matter, its ground
 #define ENABLE_PIN 3
 
+// TODO: typedef enum... (coding standard 5.1 b)
 enum LCD_views
 {
     CLOCK_VIEW = 1,
