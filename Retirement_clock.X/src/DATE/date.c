@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <avr/interrupt.h>
-#include "cmd.h"
+#include "date.h"
 #include "../USART/usart.h"
 #include "../RTC/rtc.h"
 
@@ -11,7 +11,7 @@ volatile struct tm timeinfo;  // Date
 struct tm b_timeinfo;  // Birth date
 volatile uint32_t uptime_sec = 0; // Uptime
 
-void CMD_init()
+void DATE_init()
 {    
     cli();
     timeinfo.tm_sec = 0;
@@ -20,10 +20,16 @@ void CMD_init()
     timeinfo.tm_mday = 6;
     timeinfo.tm_mon = 9 - 1;
     timeinfo.tm_year = 2020 - 1900;
+    b_timeinfo.tm_sec = 0;
+    b_timeinfo.tm_min = 0;
+    b_timeinfo.tm_hour = 0;
+    b_timeinfo.tm_mday = 1;
+    b_timeinfo.tm_mon = 1 - 1;
+    b_timeinfo.tm_year = 2000 - 1900;
     sei();
 }
 
-void CMD_incr_one_sec()
+void DATE_incr_one_sec()
 {
     // Handle time overflow
     cli();
@@ -96,59 +102,7 @@ void CMD_incr_one_sec()
     sei();
 }
 
-int CMD_exec(char *cmd)
-{    
-    char args[16][32];
-    uint8_t i = 0;
-    uint8_t j = 0;
-    uint8_t ctr = 0;
-
-    for(i = 0; i <= (strlen(cmd)); i++)
-    {
-        // if space or NULL found, assign NULL into args[ctr]
-        if((cmd[i] == ' ') || (cmd[i] == '\0'))
-        {
-            args[ctr][j] = '\0';
-            ctr++;  //for next word
-            j = 0;  //for next word, init index to 0
-        }
-        else
-        {
-            args[ctr][j] = cmd[i];
-            j++;
-        }
-    }
-
-    if((strcmp(args[1], "DATETIME") == 0) || (strcmp(args[1], "BIRTHDAY") == 0))
-    {
-        if(handle_date_cmd(args[0], args[1], args[2], args[3]) == 0)
-        {
-            return 0;
-        }
-    }
-
-    if(strcmp(args[1], "BACKLIGHT") == 0)
-    {
-        if(strcmp(args[0], "GET") == 0)
-        {
-            char msg_str[100];
-            snprintf(msg_str, sizeof(msg_str), "LCD backlight duration: %d seconds\r\n", backlight_duration);
-            USART0_sendString(msg_str);
-            return 0;
-        }
-        if(strcmp(args[0], "SET") == 0)
-        {
-            int16_t duration = atoi(args[2]);
-            backlight_duration = duration > 0 ? duration : 5;
-            return 0;
-        }
-    }
-   
-    USART0_sendString("Invalid command\r\n");
-    return 1;
-}
-
-int handle_date_cmd(char *method, char *type, char *date, char *time)
+int DATE_handle_date_cmd(char *method, char *type, char *date, char *time)
 {
     struct tm *selected_tm;
     if(strcmp(type, "DATETIME") == 0)
@@ -172,21 +126,21 @@ int handle_date_cmd(char *method, char *type, char *date, char *time)
     }
     if(strcmp(method, "SET") == 0)
     {
-        if(!is_valid_date(date))
+        if(!DATE_is_valid_date(date))
         {
             return 1;
         }
-        if((strcmp(type, "DATETIME") == 0) && !is_valid_time(time))
+        if((strcmp(type, "DATETIME") == 0) && !DATE_is_valid_time(time))
         {
             return 1;
         }
-        update_date(date, time, selected_tm);        
+        DATE_update_date(date, time, selected_tm);        
         return 0;
     }
     return 1;
 }
 
-void update_date(char date[], char time[], struct tm *selected_tm)
+void DATE_update_date(char date[], char time[], struct tm *selected_tm)
 {
     char* year_c = malloc(4);
     char* month_c = malloc(2);
@@ -210,7 +164,7 @@ void update_date(char date[], char time[], struct tm *selected_tm)
     sei();
 }
 
-int is_valid_date(char date[])
+int DATE_is_valid_date(char date[])
 {
     char* year_c = malloc(4);
     char* month_c = malloc(2);
@@ -255,7 +209,7 @@ int is_valid_date(char date[])
     return 1;
 }
 
-int is_valid_time(char time[])
+int DATE_is_valid_time(char time[])
 {
     char* hour_c = malloc(2);
     char* min_c = malloc(2);
@@ -279,4 +233,26 @@ int is_valid_time(char time[])
         return 0;
     }
     return 1;
+}
+
+void DATE_get_uptime(char *dest)
+{
+    if(uptime_sec < 1)
+    {
+        return;
+    }
+    uint32_t uptime_remaining = uptime_sec;
+    
+    cli();
+    uint8_t days = uptime_remaining / 86400;
+    uptime_remaining -= days * 86400;
+    
+    uint8_t hours = uptime_remaining / 3600;
+    uptime_remaining -= hours * 3600;
+    
+    uint8_t minutes = uptime_remaining / 60;
+    uptime_remaining -= minutes * 60;
+    
+    sprintf(dest, "%dD%02dH%02dM%02dS", days, hours, minutes, uptime_remaining);
+    sei();
 }

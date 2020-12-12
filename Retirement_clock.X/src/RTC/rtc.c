@@ -15,7 +15,7 @@
 #include <avr/interrupt.h>
 #include <avr/cpufunc.h>
 #include "../LCD/lcd.h"
-#include "../CMD/cmd.h"
+#include "../DATE/date.h"
 #include "rtc.h"
 
 
@@ -43,7 +43,7 @@ void RTC_init()
 //RTC interrupt
 ISR(RTC_PIT_vect) 
 {
-    CMD_incr_one_sec(); // Increments relevant dates by 1 sec
+    DATE_incr_one_sec(); // Increments relevant dates by 1 sec
     LCD_update_view();
     
     //testiprinttaus n�ytt��n, konvertointi INT --> String

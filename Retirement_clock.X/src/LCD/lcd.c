@@ -11,7 +11,7 @@ avr-self-learning-kit-interfacing-16-x-2-lcd-in-8-bit-mode/
 #include <time.h>
 #include <string.h>
 #include "../LCD/lcd.h"
-#include "../CMD/cmd.h"
+#include "../DATE/date.h"
 
 
 
@@ -28,6 +28,8 @@ void LCD_init()
     LCD_send_command(0x01); // Clear LCD
     _delay_ms(10);
     LCD_send_command(0x06); // Increment cursor
+    
+    LCD_view = UPTIME_VIEW;
     
     // Init backlight
     PORTF.DIRSET = PIN2_bm;
@@ -81,44 +83,33 @@ void LCD_clear(void)
     _delay_ms(2);
 }
 
-void LCD_set_view(enum LCD_views view, struct tm *timeinfo)
-{
-    switch (view)
-    {
-        case CLOCK_VIEW:;
-            // Format and copy date to string
-            char time_str[100];
-            char date_str[100];
-            strftime(time_str, sizeof(time_str), "%H:%M:%S", timeinfo);
-            strftime(date_str, sizeof(date_str), "%d.%m.%Y", timeinfo);
-            // Calculate starting indexes
-            uint8_t time_index = ((16 - strlen(time_str)) / 2) + 1;
-            uint8_t date_index = ((16 - strlen(date_str)) / 2) + 1;
-            // Display on LCD
-            LCD_clear();
-            LCD_goto(1,time_index);
-            LCD_print(time_str);
-            LCD_goto(2,date_index);
-            LCD_print(date_str);
-            break;            
-        case COUNTDOWN_VIEW:;
-            // Calculate starting index
-            int8_t start_index = ((16 - strlen("Time to RET:")) / 2) + 1;
-            // Display on LCD
-            LCD_clear();
-            LCD_goto(1, start_index);
-            LCD_print("Time to RET:");
-            LCD_goto(2, 8);
-            LCD_print("0"); // TODO
-            break;
-        case UPTIME_VIEW:;
-            // TODO
-            break;
-    }
-}
-
 void LCD_update_view()
 {
-	// TODO instead of CLOCK_VIEW use ACTIVE_VIEW ?
-    LCD_set_view(CLOCK_VIEW, DATETIME);
+    char row1_str[16];
+    char row2_str[16];
+    switch (LCD_view)
+    {
+        case CLOCK_VIEW:;
+            // Format and copy date to string            
+            strftime(row1_str, sizeof(row1_str), "%H:%M:%S", DATETIME);
+            strftime(row2_str, sizeof(row2_str), "%d.%m.%Y", DATETIME);                      
+            break;            
+        case COUNTDOWN_VIEW:;
+            strcpy(row1_str, "Time to RET:");
+            strcpy(row2_str, "420"); // TODO
+            break;
+        case UPTIME_VIEW:;
+            strcpy(row1_str, "Uptime");
+            DATE_get_uptime(row2_str);
+            break;
+    }
+    // Calculate starting indexes
+    uint8_t row1_index = ((16 - strlen(row1_str)) / 2) + 1;
+    uint8_t row2_index = ((16 - strlen(row2_str)) / 2) + 1;  
+    // Display on LCD
+    LCD_clear();
+    LCD_goto(1, row1_index);
+    LCD_print(row1_str);
+    LCD_goto(2, row2_index);
+    LCD_print(row2_str);
 }

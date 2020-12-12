@@ -6,20 +6,33 @@
 #define RW_PIN 5 // doesn't matter, its ground
 #define ENABLE_PIN 3
 
-// TODO: typedef enum... (coding standard 5.1 b)
-enum LCD_views
+/**
+ * Rotatable LCD views
+ */
+typedef enum 
 {
     CLOCK_VIEW = 1,
     COUNTDOWN_VIEW = 2,
     UPTIME_VIEW = 3
-} LCD_view;
+} LCD_views;
+
+/**
+ * The active view
+ */
+LCD_views LCD_view;
 
 void LCD_send_command(unsigned char cmnd);
 void LCD_send_data(unsigned char data);
 void LCD_init(void);
+/**
+ * Moves cursor to given point
+ * @param y Row, possible values 1 and 2
+ * @param x Column, possible values 1 to 16
+ */
 void LCD_goto(unsigned char y, unsigned char x);
 void LCD_print(char *string);
-void LCD_blink(void);
 void LCD_clear(void);
-void LCD_set_view(enum LCD_views view, struct tm *timeinfo);
-void LCD_update_view();
+/**
+ * Prints the current active view to LCD
+ */
+void LCD_update_view(void);

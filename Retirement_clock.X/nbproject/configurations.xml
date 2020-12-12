@@ -6,8 +6,8 @@
                    projectFiles="true">
       <itemPath>src/USART/usart.h</itemPath>
       <itemPath>src/LCD/lcd.h</itemPath>
-      <itemPath>src/CMD/cmd.h</itemPath>
       <itemPath>src/RTC/rtc.h</itemPath>
+      <itemPath>src/DATE/date.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -20,7 +20,7 @@
       <itemPath>src/LCD/lcd.c</itemPath>
       <itemPath>src/USART/usart.c</itemPath>
       <itemPath>src/main.c</itemPath>
-      <itemPath>src/CMD/cmd.c</itemPath>
+      <itemPath>src/DATE/date.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -33,7 +33,7 @@
     <Elem>src/LCD</Elem>
     <Elem>src/RTC</Elem>
     <Elem>src/USART</Elem>
-    <Elem>src/CMD</Elem>
+    <Elem>src/DATE</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -200,7 +200,7 @@
         <property key="memories.programmemory.ranges" value="0-5fff"/>
         <property key="poweroptions.powerenable" value="false"/>
         <property key="programmerToGoFilePath"
-                  value="/home/dtek0068/Retirement_Clock/Retirement_clock.X/debug/default/Retirement_clock_ptg"/>
+                  value="/home/dtek0068/DTEK0068_RetirementClock/Retirement_clock.X/debug/default/Retirement_clock_ptg"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.preservedataflash" value="false"/>
         <property key="programoptions.preservedataflash.ranges"
