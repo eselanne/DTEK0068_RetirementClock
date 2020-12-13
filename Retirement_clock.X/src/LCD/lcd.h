@@ -21,6 +21,7 @@ typedef enum
  */
 LCD_views LCD_view;
 
+
 void LCD_send_command(unsigned char cmnd);
 void LCD_send_data(unsigned char data);
 void LCD_init(void);
@@ -36,3 +37,7 @@ void LCD_clear(void);
  * Prints the current active view to LCD
  */
 void LCD_update_view(void);
+/**
+ * Rotate LCD-view
+ */
+void LCD_rotate_views(void);

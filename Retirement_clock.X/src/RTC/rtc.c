@@ -16,7 +16,9 @@
 #include <avr/cpufunc.h>
 #include "../LCD/lcd.h"
 #include "../DATE/date.h"
+#include "../USART/usart.h"
 #include "rtc.h"
+
 
 
 volatile int16_t backlight_duration = 5;
@@ -26,10 +28,12 @@ char str[16]; //stringi, johon tallennetaan int arvo
 
 void RTC_init()
 {
-    PORTF.DIRCLR = PIN6_bm; //set button as a input
+    PORTF.DIRCLR = PIN6_bm; //set button as a input (internal button)
+    PORTE.DIRCLR = PIN0_bm; ////set button as a input (external button)
     //configured to trigger an interrupt
     // when state goes low (when button is pressed)
-    PORTF.PIN6CTRL = PORT_ISC_FALLING_gc; 
+    PORTF.PIN6CTRL = PORT_ISC_FALLING_gc;
+    PORTE.PIN0CTRL = PORT_ISC_FALLING_gc;
     PORTF.DIRSET = PIN5_bm; //set LED as a output (TESTAUKSEEN)
     
     /* Run in debug: enabled */
@@ -67,11 +71,19 @@ ISR(RTC_PIT_vect)
     counter++;
 }
 
-//button interrupt
+//PORTF button interrupt (backlight)
 ISR(PORTF_PORT_vect) 
 {
     PORTF.INTFLAGS = 0xFF;//Clear all interrupt flags
     PORTF.OUTTGL = PIN2_bm;
     backlight_counter = 0;
+    
+}
+
+//PORTE button interrupt (rotate views)
+ISR(PORTE_PORT_vect)
+{
+    PORTE.INTFLAGS = 0xFF;//Clear all interrupt flags
+    LCD_rotate_views();
     
 }

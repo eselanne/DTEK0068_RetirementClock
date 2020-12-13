@@ -117,3 +117,14 @@ void LCD_update_view()
     LCD_goto(2, row2_index);
     LCD_print(row2_str);
 }
+
+// rotate views by changing enum value LCD_view
+void LCD_rotate_views () {
+    LCD_view++;
+    if (LCD_view > 3) 
+    {
+        LCD_view = 1;
+    }
+}
+
+
