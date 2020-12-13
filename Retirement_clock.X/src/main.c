@@ -14,106 +14,114 @@
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
 #include <avr/cpufunc.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <time.h>
 #include "LCD/lcd.h"
 #include "USART/usart.h"
+#include "DATE/date.h"
+#include "RTC/rtc.h"
 
-
-
-int backlight_counter; //t�h�n joku parempi ratkasu :D
-int backlight_duration = 5; //default value is 5 seconds
-int counter = 0;
-char str[16]; //stringi, johon tallennetaan int arvo
+int exec(char *cmd);
 
 int main(void) 
-{           
-    CNTRL_DDR = 0xFF;
-	CNTRL_PORT = 0x00;
-	DATA_DDR = 0xFF;
-	DATA_PORT = 0x00;
-	
-	LCD_clear();
-    LCD_init();
-	LCD_goto(1,2);
-	LCD_print("Time to RET:");
-	LCD_goto(2,3);
-	LCD_print("0");
-    
-    PORTF.DIRSET = PIN2_bm; //set PB5 as a output
-    PORTF.OUTCLR = PIN2_bm; //turn off backlight
-    PORTF.DIRCLR = PIN6_bm; //set button as a input
-    PORTF.PIN6CTRL = PORT_ISC_FALLING_gc; //configured to trigger an interrupt when state goes low (when button is pressed)
-    
-    set_sleep_mode(SLPCTRL_SMODE_IDLE_gc); //set IDLE as a sleep mode
-    
-    PORTF.DIRSET = PIN5_bm; //set LED as a output (TESTAUKSEEN)
-    
-    RTC_init(); 
-    
-    sei();
-    
-	while(1)
-    {
-        RTC.PITCTRLA |= RTC_PITEN_bm; //start RTC
-        sleep_mode();         
-    }
-    
-    /*
+{     
+    // Init stuff
+    LCD_init();	
+    DATE_init();
+    LCD_update_view();
+    USART0_init();
+    RTC_init();
+
     char command[MAX_COMMAND_LEN];
     uint8_t index = 0;
     char c;
-    
-    USART0_init();
-    
+    uint8_t exit_code = 0;    
+   
     while (1)
     {
-        c = USART0_readChar();
-        USART0_sendChar(c);
-        if(c != '\n' && c != '\r')
+        c = USART0_readChar(); // Read serial user interface char by char
+        switch (c)
         {
-            command[index++] = c;
-            if(index > MAX_COMMAND_LEN)
-            {
+        	// TODO handle arrows here ?
+            case 127:
+                // Backspace
+                command[--index] = '\0';
+                break;
+            case '\r':
+                // Carriage return
+                command[index] = '\0';
                 index = 0;
-            }
-        }
-        
-        if(c == '\r')
+                USART0_sendString("\r\n");
+                exit_code = exec(command);
+                break;
+            default:
+                command[index++] = c;
+                if(index > MAX_COMMAND_LEN)
+                {
+                    index = 0;
+                }
+        } 
+        USART0_sendChar(c); // Show the char        
+        if(exit_code != 0)
         {
-            command[index] = '\0';
-            index = 0;
-            USART0_sendChar('\n');
-            executeCommand(command);
+            USART0_sendString("Invalid command\r\n");
+            exit_code = 0;
         }
-    }*/
+    }
 }
 
-//RTC interrupt
-ISR(RTC_PIT_vect) 
-{
-    //testiprinttaus n�ytt��n, konvertointi INT --> String
-    sprintf(str, "%d", counter);
-	LCD_goto(2,3);
-	LCD_print(str);
-    
-    RTC.PITINTFLAGS = RTC_PITEN_bm;//Clear all interrupt flags
-    PORTF.OUTTGL = PIN5_bm; //AVR-Led Toggle ON/OFF (TESTAUKSEEN)
-    
-    
-    if (backlight_counter < backlight_duration && backlight_counter >= 0) {
-        backlight_counter++;
-    }
-    else 
+int exec(char *cmd)
+{    
+    // Parse command
+    char args[16][32];
+    uint8_t i = 0;
+    uint8_t j = 0;
+    uint8_t ctr = 0;
+    for(i = 0; i <= (strlen(cmd)); i++)
     {
-        PORTF.OUTCLR = PIN2_bm;
+        // if space or NULL found, assign NULL into args[ctr]
+        if((cmd[i] == ' ') || (cmd[i] == '\0'))
+        {
+            args[ctr][j] = '\0';
+            ctr++;  //for next word
+            j = 0;  //for next word, init index to 0
+        }
+        else
+        {
+            args[ctr][j] = cmd[i];
+            j++;
+        }
     }
-    counter++;
-}
 
-//button interrupt
-ISR(PORTF_PORT_vect) 
-{
-    PORTF.INTFLAGS = 0xFF;//Clear all interrupt flags
-    PORTF.OUTSET = PIN2_bm;
-    backlight_counter = 0;
+    // Handle date command
+    if((strcmp(args[1], "DATETIME") == 0) || (strcmp(args[1], "BIRTHDAY") == 0))
+    {
+        if(DATE_handle_date_cmd(args[0], args[1], args[2], args[3]) == 0)
+        {
+            return 0;
+        }
+    }
     
+    // Handle backlight command
+    if(strcmp(args[1], "BACKLIGHT") == 0)
+    {
+        if(strcmp(args[0], "GET") == 0)
+        {
+            char msg_str[100];
+            snprintf(msg_str, sizeof(msg_str),
+                    "LCD backlight duration: %d seconds\r\n",
+                    backlight_duration);
+            USART0_sendString(msg_str);
+            return 0;
+        }
+        if(strcmp(args[0], "SET") == 0)
+        {
+            int16_t duration = atoi(args[2]);
+            backlight_duration = duration > 0 ? duration : 5;
+            return 0;
+        }
+    }
+    
+    return 1;
 }

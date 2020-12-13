@@ -17,6 +17,10 @@ void USART0_init(void)
     USART0.BAUD = (uint16_t)USART0_BAUD_RATE(9600);
 
     USART0.CTRLB |= USART_RXEN_bm | USART_TXEN_bm;
+    
+    //stdout = &USART_stream;    
+    //printf("Ready.\n"); not working :(
+    
     USART0_sendString("Ready.\r\n");
 }
 
@@ -44,28 +48,4 @@ char USART0_readChar(void)
         ;
     }
     return USART0.RXDATAL;
-}
-
-void executeCommand(char *command)
-{
-    LCD_clear();
-    LCD_goto(1,1);
-    LCD_print(command);
-    /*
-    if(strcmp(command, "ON") == 0)
-    {
-        LCD_clear();
-        LCD_goto(1,2);
-        LCD_print("PAALLA!");
-    }
-    else if (strcmp(command, "OFF") == 0)
-    {
-        LCD_clear();
-        LCD_goto(1,2);
-        LCD_print("EI OLE PAALLA!");
-    } 
-    else 
-    {
-        USART0_sendString("Incorrect command.\r\n");
-    }*/
 }
