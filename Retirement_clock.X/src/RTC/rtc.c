@@ -39,7 +39,7 @@ void RTC_init()
     PORTE.PIN0CTRL |= PORT_PULLUPEN_bm; //enable pull up resistor
     
     PORTF.DIRSET = PIN5_bm; //set LED as a output (TESTAUKSEEN)
-    PORTC.DIRSET = PIN4_bm;
+    PORTC.DIRSET = PIN4_bm; //set BUZZER as a output
     
     
     /* Run in debug: enabled */
