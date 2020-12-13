@@ -27,7 +27,9 @@ char str[16]; //stringi, johon tallennetaan int arvo
 void RTC_init()
 {
     PORTF.DIRCLR = PIN6_bm; //set button as a input
-    PORTF.PIN6CTRL = PORT_ISC_FALLING_gc; //configured to trigger an interrupt when state goes low (when button is pressed)
+    //configured to trigger an interrupt
+    // when state goes low (when button is pressed)
+    PORTF.PIN6CTRL = PORT_ISC_FALLING_gc; 
     PORTF.DIRSET = PIN5_bm; //set LED as a output (TESTAUKSEEN)
     
     /* Run in debug: enabled */

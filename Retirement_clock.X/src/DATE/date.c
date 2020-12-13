@@ -127,7 +127,8 @@ int DATE_handle_date_cmd(char *method, char *type, char *date, char *time)
     if(strcmp(method, "GET") == 0)
     {
         char msg_str[100];
-        strftime(msg_str, sizeof(msg_str), "%d.%m.%Y %H:%M:%S\r\n", selected_tm);
+        strftime(msg_str, sizeof(msg_str),
+                "%d.%m.%Y %H:%M:%S\r\n", selected_tm);
         USART0_sendString(msg_str);
         return 0;
     }

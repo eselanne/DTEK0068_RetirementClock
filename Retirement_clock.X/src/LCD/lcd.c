@@ -93,8 +93,10 @@ void LCD_update_view()
     {
         case CLOCK_VIEW:
             // Format and copy date to string            
-            strftime(row1_str, sizeof(row1_str), "%H:%M:%S", (struct tm*) DATETIME);
-            strftime(row2_str, sizeof(row2_str), "%d.%m.%Y", (struct tm*) DATETIME);                      
+            strftime(row1_str, sizeof(row1_str),
+                    "%H:%M:%S", (struct tm*) DATETIME);
+            strftime(row2_str, sizeof(row2_str),
+                    "%d.%m.%Y", (struct tm*) DATETIME);                      
             break;            
         case COUNTDOWN_VIEW:
             strcpy(row1_str, "Retirement in");

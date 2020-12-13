@@ -109,7 +109,9 @@ int exec(char *cmd)
         if(strcmp(args[0], "GET") == 0)
         {
             char msg_str[100];
-            snprintf(msg_str, sizeof(msg_str), "LCD backlight duration: %d seconds\r\n", backlight_duration);
+            snprintf(msg_str, sizeof(msg_str),
+                    "LCD backlight duration: %d seconds\r\n",
+                    backlight_duration);
             USART0_sendString(msg_str);
             return 0;
         }
