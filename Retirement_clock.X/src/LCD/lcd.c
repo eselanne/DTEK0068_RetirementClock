@@ -29,7 +29,7 @@ void LCD_init()
     _delay_ms(10);
     LCD_send_command(0x06); // Increment cursor
     
-    LCD_view = UPTIME_VIEW;
+    LCD_view = COUNTDOWN_VIEW;
     
     // Init backlight
     PORTF.DIRSET = PIN2_bm;
@@ -85,20 +85,20 @@ void LCD_clear(void)
 
 void LCD_update_view()
 {
-    char row1_str[16];
-    char row2_str[16];
+    char row1_str[1000];
+    char row2_str[1000];
     switch (LCD_view)
     {
-        case CLOCK_VIEW:;
+        case CLOCK_VIEW:
             // Format and copy date to string            
             strftime(row1_str, sizeof(row1_str), "%H:%M:%S", DATETIME);
             strftime(row2_str, sizeof(row2_str), "%d.%m.%Y", DATETIME);                      
             break;            
-        case COUNTDOWN_VIEW:;
-            strcpy(row1_str, "Time to RET:");
-            strcpy(row2_str, "420"); // TODO
+        case COUNTDOWN_VIEW:
+            strcpy(row1_str, "Retirement in");
+            DATE_get_countdown(row2_str);
             break;
-        case UPTIME_VIEW:;
+        case UPTIME_VIEW:
             strcpy(row1_str, "Uptime");
             DATE_get_uptime(row2_str);
             break;

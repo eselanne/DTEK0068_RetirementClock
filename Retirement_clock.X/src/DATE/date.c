@@ -7,34 +7,41 @@
 #include "../RTC/rtc.h"
 
 
-volatile struct tm timeinfo;  // Date
+volatile struct tm timeinfo;  // Datetime
 struct tm b_timeinfo;  // Birth date
+struct tm r_timeinfo; // Retirement date
 volatile uint32_t uptime_sec = 0; // Uptime
+volatile uint32_t time_to_ret_sec; // Uptime
 
 void DATE_init()
 {    
     cli();
-    timeinfo.tm_sec = 0;
-    timeinfo.tm_min = 20;
-    timeinfo.tm_hour = 4;
-    timeinfo.tm_mday = 6;
-    timeinfo.tm_mon = 9 - 1;
-    timeinfo.tm_year = 2020 - 1900;
-    b_timeinfo.tm_sec = 0;
-    b_timeinfo.tm_min = 0;
-    b_timeinfo.tm_hour = 0;
-    b_timeinfo.tm_mday = 1;
-    b_timeinfo.tm_mon = 1 - 1;
-    b_timeinfo.tm_year = 2000 - 1900;
+    // Init datetime
+    timeinfo.tm_sec = 1;
+    timeinfo.tm_min = 1;
+    timeinfo.tm_hour = 1;
+    timeinfo.tm_mday = 1;
+    timeinfo.tm_mon = 11 - 1;
+    timeinfo.tm_year = 2025 - 1900;
+    // Init birth date
+    b_timeinfo.tm_sec = 1;
+    b_timeinfo.tm_min = 1;
+    b_timeinfo.tm_hour = 1;
+    b_timeinfo.tm_mday = 2;
+    b_timeinfo.tm_mon = 11 - 1;
+    b_timeinfo.tm_year = 1960 - 1900;
+    // Init retirement
+    DATE_update_ret_date();    
     sei();
 }
 
 void DATE_incr_one_sec()
 {
-    // Handle time overflow
     cli();
     uptime_sec++;
+    time_to_ret_sec--;
     timeinfo.tm_sec++;
+    // Handle time overflow
     if(timeinfo.tm_sec >= 60)
     {
         timeinfo.tm_sec = 0;
@@ -134,7 +141,8 @@ int DATE_handle_date_cmd(char *method, char *type, char *date, char *time)
         {
             return 1;
         }
-        DATE_update_date(date, time, selected_tm);        
+        DATE_update_date(date, time, selected_tm);
+        DATE_update_ret_date();     
         return 0;
     }
     return 1;
@@ -240,19 +248,104 @@ void DATE_get_uptime(char *dest)
     if(uptime_sec < 1)
     {
         return;
-    }
-    uint32_t uptime_remaining = uptime_sec;
-    
+    }    
     cli();
-    uint8_t days = uptime_remaining / 86400;
-    uptime_remaining -= days * 86400;
-    
-    uint8_t hours = uptime_remaining / 3600;
-    uptime_remaining -= hours * 3600;
-    
-    uint8_t minutes = uptime_remaining / 60;
-    uptime_remaining -= minutes * 60;
-    
-    sprintf(dest, "%dD%02dH%02dM%02dS", days, hours, minutes, uptime_remaining);
+    DATE_sec_to_countdown_format(uptime_sec, dest);
     sei();
+}
+
+void DATE_calc_ret_date(struct tm *dest_tm)
+{
+    dest_tm->tm_sec = /*b_timeinfo.tm_sec*/ 0;
+    dest_tm->tm_min = /*b_timeinfo.tm_min*/ 0;
+    dest_tm->tm_hour = /*b_timeinfo.tm_hour*/ 0;
+    dest_tm->tm_mday = b_timeinfo.tm_mday;
+    dest_tm->tm_mon = b_timeinfo.tm_mon;
+    dest_tm->tm_year = b_timeinfo.tm_year + RET_AGE;
+}
+
+void DATE_get_countdown(char *dest)
+{    
+    cli();
+    DATE_sec_to_countdown_format(time_to_ret_sec, dest);
+    sei();
+}
+
+void DATE_sec_to_countdown_format(uint32_t seconds, char *dest)
+{
+    uint32_t remaining_seconds = seconds;
+    uint16_t days = remaining_seconds / 86400;
+    remaining_seconds %= 86400;
+    uint8_t hours = (remaining_seconds / 3600);
+    remaining_seconds %= 3600;
+    uint8_t minutes = (remaining_seconds / 60);
+    remaining_seconds %= 60;    
+    snprintf(dest, 100000, "%02dD%02dH%02dM%02dS", 
+            days, hours, minutes, remaining_seconds);
+}
+
+uint32_t DATE_diff_in_seconds(struct tm *start, struct tm *end)
+{
+    
+    uint32_t T1 = DATE_JSN(start->tm_year + 1900, start->tm_mon + 1,
+            start->tm_mday,start->tm_hour, start->tm_min, start->tm_sec);
+    uint32_t T2 = DATE_JSN(end->tm_year + 1900, end->tm_mon + 1,end->tm_mday, 
+            end->tm_hour, end->tm_min, end->tm_sec);
+    return T2-T1;
+    
+    /*
+    uint32_t seconds = 0;
+    uint8_t is_first_loop = 1;
+    uint8_t is_first_month = 1;
+    uint16_t year = start->tm_year + 1900;
+    // Loop years
+    for(year; year <= (end->tm_year + 1900); year++)
+    {
+        uint8_t is_last_loop = year == (end->tm_year + 1900);
+        uint8_t month = is_first_loop ? (start->tm_mon + 1) : 1;
+        uint8_t last_month = is_last_loop ? end->tm_mon : 12;
+        // Loop "full" months in a year
+        // First month is most likely not full, so it's an exception
+        for(month; month <= last_month; month++)
+        {
+            uint8_t days_in_month = 31;
+            if(month == 2)
+            {
+                days_in_month = is_leap_year(year) ? 29 : 28;
+            }
+            if((month == 4) || (month == 6) || (month == 9) || (month == 11))
+            {
+                days_in_month = 30;
+            }
+            seconds += days_in_month * 86400;
+            seconds -= is_first_month ? ((start->tm_mday - 1) * 86400) : 0;
+            is_first_month = 0;
+        }
+        // Add remaining seconds
+        if(is_last_loop)
+        {
+            seconds += (end->tm_mday - 1) * 86400;
+            seconds += end->tm_hour * 3600;
+            seconds += end->tm_min * 60;
+            seconds += end->tm_sec;
+        }
+        is_first_loop = 0;
+    }
+    return seconds;*/
+}
+
+uint32_t DATE_JDN_mod(uint16_t Y, uint8_t M, uint8_t D) { 
+    return 367*Y - 7*(Y+(M+9)/12)/4 + 275*M/9 + D;
+}
+
+uint32_t DATE_JSN(uint16_t Y, uint8_t M, uint8_t D,
+             uint8_t H, uint8_t m, uint8_t S) {
+    uint32_t secs_per_day = 24 * 60 * 60;
+    return DATE_JDN_mod(Y-1900, M, D) * secs_per_day + H * 3600 + m * 60 + S;
+}
+
+void DATE_update_ret_date()
+{
+    DATE_calc_ret_date(RETIREMENT);
+    time_to_ret_sec = DATE_diff_in_seconds(DATETIME, RETIREMENT);
 }

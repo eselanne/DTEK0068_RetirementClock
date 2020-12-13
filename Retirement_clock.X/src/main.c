@@ -22,6 +22,7 @@
 #include "DATE/date.h"
 #include "RTC/rtc.h"
 
+int exec(char *cmd);
 
 int main(void) 
 {     
