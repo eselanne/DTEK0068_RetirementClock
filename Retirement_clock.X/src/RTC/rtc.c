@@ -30,11 +30,17 @@ void RTC_init()
 {
     PORTF.DIRCLR = PIN6_bm; //set button as a input (internal button)
     PORTE.DIRCLR = PIN0_bm; ////set button as a input (external button)
+    
     //configured to trigger an interrupt
     // when state goes low (when button is pressed)
     PORTF.PIN6CTRL = PORT_ISC_FALLING_gc;
     PORTE.PIN0CTRL = PORT_ISC_FALLING_gc;
+    
+    PORTE.PIN0CTRL |= PORT_PULLUPEN_bm; //enable pull up resistor
+    
     PORTF.DIRSET = PIN5_bm; //set LED as a output (TESTAUKSEEN)
+    PORTC.DIRSET = PIN4_bm;
+    
     
     /* Run in debug: enabled */
     RTC.DBGCTRL = RTC_DBGRUN_bm;
@@ -51,11 +57,6 @@ ISR(RTC_PIT_vect)
 {
     DATE_incr_one_sec(); // Increments relevant dates by 1 sec
     LCD_update_view();
-    
-    //testiprinttaus n�ytt��n, konvertointi INT --> String
-    //sprintf(str, "%d", counter);
-	//LCD_goto(2,3);
-	//LCD_print(str);
     
     RTC.PITINTFLAGS = RTC_PITEN_bm;//Clear all interrupt flags
     PORTF.OUTTGL = PIN5_bm; //AVR-Led Toggle ON/OFF (TESTAUKSEEN)
@@ -85,5 +86,7 @@ ISR(PORTE_PORT_vect)
 {
     PORTE.INTFLAGS = 0xFF;//Clear all interrupt flags
     LCD_rotate_views();
+    //stop buzzer
+    PORTC.OUTCLR = PIN4_bm;
     
 }

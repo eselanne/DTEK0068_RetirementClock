@@ -18,6 +18,10 @@ volatile struct tm b_timeinfo;
 volatile struct tm r_timeinfo;
 // Uptime in seconds
 volatile uint32_t uptime_sec;
+//Time to retirement
+volatile uint32_t time_to_ret_sec;
+// Boolean if person is retired or not
+volatile uint8_t is_retired;
 
 /**
  * Sets initial date, birth date and retirement date

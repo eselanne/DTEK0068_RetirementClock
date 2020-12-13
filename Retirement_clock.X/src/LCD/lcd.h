@@ -12,8 +12,9 @@
 typedef enum 
 {
     CLOCK_VIEW = 1,
-    COUNTDOWN_VIEW = 2,
-    UPTIME_VIEW = 3
+    UPTIME_VIEW = 2,
+    COUNTDOWN_VIEW = 3,
+    RETIREMENT_VIEW = 4
 } LCD_views;
 
 /**

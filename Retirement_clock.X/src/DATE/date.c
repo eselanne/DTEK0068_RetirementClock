@@ -2,9 +2,12 @@
 #include <string.h>
 #include <stdio.h>
 #include <avr/interrupt.h>
+#include <avr/io.h>
 #include "date.h"
 #include "../USART/usart.h"
 #include "../RTC/rtc.h"
+#include "../LCD/lcd.h"
+
 
 
 volatile struct tm timeinfo;  // Datetime
@@ -12,16 +15,17 @@ volatile struct tm b_timeinfo;  // Birth date
 volatile struct tm r_timeinfo; // Retirement date
 volatile uint32_t uptime_sec = 0; // Uptime
 volatile uint32_t time_to_ret_sec; // Uptime
+volatile uint8_t is_retired = 0; // 0 = not retired, 1 = yes retired
 
 void DATE_init()
 {    
     cli();
     // Init datetime
-    timeinfo.tm_sec = 0;
+    timeinfo.tm_sec = 40;
     timeinfo.tm_min = 59;
-    timeinfo.tm_hour = 17;
-    timeinfo.tm_mday = 13;
-    timeinfo.tm_mon = 12 - 1;
+    timeinfo.tm_hour = 23;
+    timeinfo.tm_mday = 3;
+    timeinfo.tm_mon = 3 - 1;
     timeinfo.tm_year = 2020 - 1900;
     // Init birth date
     b_timeinfo.tm_sec = 0;
@@ -29,7 +33,7 @@ void DATE_init()
     b_timeinfo.tm_hour = 0;
     b_timeinfo.tm_mday = 4;
     b_timeinfo.tm_mon = 3 - 1;
-    b_timeinfo.tm_year = 1997 - 1900;
+    b_timeinfo.tm_year = 1955 - 1900;
     // Init retirement
     DATE_update_ret_date();    
     sei();
@@ -39,7 +43,7 @@ void DATE_incr_one_sec()
 {
     cli();
     uptime_sec++;
-    time_to_ret_sec--;
+    time_to_ret_sec -= time_to_ret_sec == 0 ? 0:1;
     timeinfo.tm_sec++;
     // Handle time overflow
     if(timeinfo.tm_sec >= 60)
@@ -105,6 +109,13 @@ void DATE_incr_one_sec()
         timeinfo.tm_mday = 1;
         timeinfo.tm_mon = 0;
         timeinfo.tm_year++;
+    }
+    //Activate buzzer and change retirement view
+    if (time_to_ret_sec == 0 && is_retired == 0)
+    {
+        is_retired = 1;
+        PORTC.OUTSET = PIN4_bm;
+        LCD_view = 4;
     }
     sei();
 }

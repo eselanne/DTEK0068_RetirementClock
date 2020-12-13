@@ -106,6 +106,13 @@ void LCD_update_view()
             strcpy(row1_str, "Uptime");
             DATE_get_uptime(row2_str);
             break;
+        case RETIREMENT_VIEW:
+            strcpy(row1_str, "Go home,");
+            strcpy(row2_str, "old-timer!");
+            break;
+            
+            
+            
     }
     // Calculate starting indexes
     uint8_t row1_index = ((16 - strlen(row1_str)) / 2) + 1;
@@ -118,13 +125,25 @@ void LCD_update_view()
     LCD_print(row2_str);
 }
 
-// rotate views by changing enum value LCD_view
+// rotate views
+// if is_retired == 1, View 3 wont show up
 void LCD_rotate_views () {
     LCD_view++;
-    if (LCD_view > 3) 
+    if (LCD_view >= 3) 
     {
-        LCD_view = 1;
+        if (LCD_view == 3 && is_retired == 1)
+        {
+            LCD_view = 4;
+        } 
+        else if (LCD_view == 3) {
+            LCD_view = 3;
+        }
+        else
+        {
+            LCD_view = 1;
+        }
     }
+    LCD_update_view();
 }
 
 
