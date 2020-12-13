@@ -30,7 +30,7 @@ void LCD_init()
     LCD_send_command(0x06); // Increment cursor
     
     // Possible values: CLOCK_VIEW, RETIREMENT_VIEW and UPTIME_VIEW
-    LCD_view = UPTIME_VIEW;
+    LCD_view = COUNTDOWN_VIEW;
     
     // Init backlight
     PORTF.DIRSET = PIN2_bm;
