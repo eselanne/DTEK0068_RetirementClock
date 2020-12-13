@@ -17,19 +17,19 @@ void DATE_init()
 {    
     cli();
     // Init datetime
-    timeinfo.tm_sec = 1;
-    timeinfo.tm_min = 1;
-    timeinfo.tm_hour = 1;
-    timeinfo.tm_mday = 1;
-    timeinfo.tm_mon = 11 - 1;
-    timeinfo.tm_year = 2025 - 1900;
+    timeinfo.tm_sec = 0;
+    timeinfo.tm_min = 0;
+    timeinfo.tm_hour = 0;
+    timeinfo.tm_mday = 1; // TODO tm_mday != 1
+    timeinfo.tm_mon = 3 - 1;
+    timeinfo.tm_year = 2062 - 1900;
     // Init birth date
-    b_timeinfo.tm_sec = 1;
-    b_timeinfo.tm_min = 1;
-    b_timeinfo.tm_hour = 1;
-    b_timeinfo.tm_mday = 2;
-    b_timeinfo.tm_mon = 11 - 1;
-    b_timeinfo.tm_year = 1960 - 1900;
+    b_timeinfo.tm_sec = 0;
+    b_timeinfo.tm_min = 0;
+    b_timeinfo.tm_hour = 0;
+    b_timeinfo.tm_mday = 4;
+    b_timeinfo.tm_mon = 3 - 1;
+    b_timeinfo.tm_year = 1997 - 1900;
     // Init retirement
     DATE_update_ret_date();    
     sei();
@@ -285,15 +285,7 @@ void DATE_sec_to_countdown_format(uint32_t seconds, char *dest)
 }
 
 uint32_t DATE_diff_in_seconds(struct tm *start, struct tm *end)
-{
-    
-    uint32_t T1 = DATE_JSN(start->tm_year + 1900, start->tm_mon + 1,
-            start->tm_mday,start->tm_hour, start->tm_min, start->tm_sec);
-    uint32_t T2 = DATE_JSN(end->tm_year + 1900, end->tm_mon + 1,end->tm_mday, 
-            end->tm_hour, end->tm_min, end->tm_sec);
-    return T2-T1;
-    
-    /*
+{  
     uint32_t seconds = 0;
     uint8_t is_first_loop = 1;
     uint8_t is_first_month = 1;
@@ -331,17 +323,7 @@ uint32_t DATE_diff_in_seconds(struct tm *start, struct tm *end)
         }
         is_first_loop = 0;
     }
-    return seconds;*/
-}
-
-uint32_t DATE_JDN_mod(uint16_t Y, uint8_t M, uint8_t D) { 
-    return 367*Y - 7*(Y+(M+9)/12)/4 + 275*M/9 + D;
-}
-
-uint32_t DATE_JSN(uint16_t Y, uint8_t M, uint8_t D,
-             uint8_t H, uint8_t m, uint8_t S) {
-    uint32_t secs_per_day = 24 * 60 * 60;
-    return DATE_JDN_mod(Y-1900, M, D) * secs_per_day + H * 3600 + m * 60 + S;
+    return seconds;
 }
 
 void DATE_update_ret_date()

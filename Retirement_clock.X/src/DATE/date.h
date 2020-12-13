@@ -73,6 +73,3 @@ uint32_t DATE_diff_in_seconds(struct tm *start, struct tm *end);
  * to retirement based on datetime.
  */
 void DATE_update_ret_date(void);
-uint32_t DATE_JSN(uint16_t years, uint8_t months, uint8_t days,
-        uint8_t hours, uint8_t minutes, uint8_t seconds);
-uint32_t DATE_JDN_mod(uint16_t years, uint8_t months, uint8_t days);
