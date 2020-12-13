@@ -13,9 +13,9 @@
 // Datetime
 volatile struct tm timeinfo;
 // Birth date
-struct tm b_timeinfo;
+volatile struct tm b_timeinfo;
 // Retirement date
-struct tm r_timeinfo;
+volatile struct tm r_timeinfo;
 // Uptime in seconds
 volatile uint32_t uptime_sec;
 

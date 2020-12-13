@@ -8,8 +8,8 @@
 
 
 volatile struct tm timeinfo;  // Datetime
-struct tm b_timeinfo;  // Birth date
-struct tm r_timeinfo; // Retirement date
+volatile struct tm b_timeinfo;  // Birth date
+volatile struct tm r_timeinfo; // Retirement date
 volatile uint32_t uptime_sec = 0; // Uptime
 volatile uint32_t time_to_ret_sec; // Uptime
 
@@ -22,7 +22,7 @@ void DATE_init()
     timeinfo.tm_hour = 0;
     timeinfo.tm_mday = 1; // TODO tm_mday != 1
     timeinfo.tm_mon = 3 - 1;
-    timeinfo.tm_year = 2062 - 1900;
+    timeinfo.tm_year = 2020 - 1900;
     // Init birth date
     b_timeinfo.tm_sec = 0;
     b_timeinfo.tm_min = 0;
@@ -114,11 +114,11 @@ int DATE_handle_date_cmd(char *method, char *type, char *date, char *time)
     struct tm *selected_tm;
     if(strcmp(type, "DATETIME") == 0)
     {
-        selected_tm = &timeinfo;
+        selected_tm = (struct tm*) &timeinfo;
     }
     else if(strcmp(type, "BIRTHDAY") == 0)
     {
-        selected_tm = &b_timeinfo;
+        selected_tm = (struct tm*) &b_timeinfo;
     }
     else
     {
@@ -280,8 +280,8 @@ void DATE_sec_to_countdown_format(uint32_t seconds, char *dest)
     remaining_seconds %= 3600;
     uint8_t minutes = (remaining_seconds / 60);
     remaining_seconds %= 60;    
-    snprintf(dest, 100000, "%02dD%02dH%02dM%02dS", 
-            days, hours, minutes, remaining_seconds);
+    snprintf(dest, 100, "%02dD%02dH%02dM%02dS", 
+            (int)days, (int)hours, (int)minutes, (int)remaining_seconds);
 }
 
 uint32_t DATE_diff_in_seconds(struct tm *start, struct tm *end)
@@ -291,14 +291,14 @@ uint32_t DATE_diff_in_seconds(struct tm *start, struct tm *end)
     uint8_t is_first_month = 1;
     uint16_t year = start->tm_year + 1900;
     // Loop years
-    for(year; year <= (end->tm_year + 1900); year++)
+    for(; year <= (end->tm_year + 1900); year++)
     {
         uint8_t is_last_loop = year == (end->tm_year + 1900);
         uint8_t month = is_first_loop ? (start->tm_mon + 1) : 1;
         uint8_t last_month = is_last_loop ? end->tm_mon : 12;
         // Loop "full" months in a year
         // First month is most likely not full, so it's an exception
-        for(month; month <= last_month; month++)
+        for(; month <= last_month; month++)
         {
             uint8_t days_in_month = 31;
             if(month == 2)
@@ -328,6 +328,7 @@ uint32_t DATE_diff_in_seconds(struct tm *start, struct tm *end)
 
 void DATE_update_ret_date()
 {
-    DATE_calc_ret_date(RETIREMENT);
-    time_to_ret_sec = DATE_diff_in_seconds(DATETIME, RETIREMENT);
+    DATE_calc_ret_date((struct tm*) RETIREMENT);
+    time_to_ret_sec = DATE_diff_in_seconds((struct tm*) DATETIME,
+                                            (struct tm*) RETIREMENT);
 }

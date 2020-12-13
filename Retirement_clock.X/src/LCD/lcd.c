@@ -29,7 +29,8 @@ void LCD_init()
     _delay_ms(10);
     LCD_send_command(0x06); // Increment cursor
     
-    LCD_view = COUNTDOWN_VIEW;
+    // Possible values: CLOCK_VIEW, RETIREMENT_VIEW and UPTIME_VIEW
+    LCD_view = UPTIME_VIEW;
     
     // Init backlight
     PORTF.DIRSET = PIN2_bm;
@@ -92,8 +93,8 @@ void LCD_update_view()
     {
         case CLOCK_VIEW:
             // Format and copy date to string            
-            strftime(row1_str, sizeof(row1_str), "%H:%M:%S", DATETIME);
-            strftime(row2_str, sizeof(row2_str), "%d.%m.%Y", DATETIME);                      
+            strftime(row1_str, sizeof(row1_str), "%H:%M:%S", (struct tm*) DATETIME);
+            strftime(row2_str, sizeof(row2_str), "%d.%m.%Y", (struct tm*) DATETIME);                      
             break;            
         case COUNTDOWN_VIEW:
             strcpy(row1_str, "Retirement in");

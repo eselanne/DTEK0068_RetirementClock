@@ -1,3 +1,3 @@
 void RTC_init(void);
 
-extern int16_t backlight_duration;
+extern volatile int16_t backlight_duration;

@@ -19,8 +19,8 @@
 #include "rtc.h"
 
 
-int16_t backlight_duration = 5;
-int backlight_counter; //t�h�n joku parempi ratkasu :D
+volatile int16_t backlight_duration = 5;
+volatile int backlight_counter; //t�h�n joku parempi ratkasu :D
 int counter = 0;
 char str[16]; //stringi, johon tallennetaan int arvo
 
