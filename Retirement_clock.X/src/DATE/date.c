@@ -18,10 +18,10 @@ void DATE_init()
     cli();
     // Init datetime
     timeinfo.tm_sec = 0;
-    timeinfo.tm_min = 0;
-    timeinfo.tm_hour = 0;
-    timeinfo.tm_mday = 1; // TODO tm_mday != 1
-    timeinfo.tm_mon = 3 - 1;
+    timeinfo.tm_min = 59;
+    timeinfo.tm_hour = 17;
+    timeinfo.tm_mday = 13;
+    timeinfo.tm_mon = 12 - 1;
     timeinfo.tm_year = 2020 - 1900;
     // Init birth date
     b_timeinfo.tm_sec = 0;
@@ -288,15 +288,15 @@ void DATE_sec_to_countdown_format(uint32_t seconds, char *dest)
 uint32_t DATE_diff_in_seconds(struct tm *start, struct tm *end)
 {  
     uint32_t seconds = 0;
-    uint8_t is_first_loop = 1;
+    uint8_t is_first_year = 1;
     uint8_t is_first_month = 1;
     uint16_t year = start->tm_year + 1900;
     // Loop years
     for(; year <= (end->tm_year + 1900); year++)
     {
-        uint8_t is_last_loop = year == (end->tm_year + 1900);
-        uint8_t month = is_first_loop ? (start->tm_mon + 1) : 1;
-        uint8_t last_month = is_last_loop ? end->tm_mon : 12;
+        uint8_t is_last_year = year == (end->tm_year + 1900);
+        uint8_t month = is_first_year ? (start->tm_mon + 1) : 1;
+        uint8_t last_month = is_last_year ? (end->tm_mon + 1) : 12;
         // Loop "full" months in a year
         // First month is most likely not full, so it's an exception
         for(; month <= last_month; month++)
@@ -310,19 +310,27 @@ uint32_t DATE_diff_in_seconds(struct tm *start, struct tm *end)
             {
                 days_in_month = 30;
             }
-            seconds += days_in_month * 86400;
-            seconds -= is_first_month ? ((start->tm_mday - 1) * 86400) : 0;
-            is_first_month = 0;
+            if(is_last_year && (month == last_month))
+            {
+                // Remove days from the end of the last month
+                seconds -= (days_in_month * 86400) - 
+                        ((end->tm_mday + 1) * 86400);
+            }
+            if(is_first_month)
+            {
+                // Remove days from the start of the first month
+                days_in_month -= start->tm_mday + 1;
+                // Remove extra hours, minutes and seconds
+                uint32_t hours = start->tm_hour;
+                seconds -= hours * 3600;
+                uint16_t mins = start->tm_min;
+                seconds -= mins * 60;
+                seconds -= start->tm_sec;
+                is_first_month = 0;
+            }
+            seconds += days_in_month * 86400;         
         }
-        // Add remaining seconds
-        if(is_last_loop)
-        {
-            seconds += (end->tm_mday - 1) * 86400;
-            seconds += end->tm_hour * 3600;
-            seconds += end->tm_min * 60;
-            seconds += end->tm_sec;
-        }
-        is_first_loop = 0;
+        is_first_year = 0;
     }
     return seconds;
 }
