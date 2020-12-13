@@ -85,6 +85,7 @@ void LCD_clear(void)
 
 void LCD_update_view()
 {
+    // TODO
     char row1_str[1000];
     char row2_str[1000];
     switch (LCD_view)
