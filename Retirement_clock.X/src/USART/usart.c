@@ -18,9 +18,6 @@ void USART0_init(void)
 
     USART0.CTRLB |= USART_RXEN_bm | USART_TXEN_bm;
     
-    //stdout = &USART_stream;    
-    //printf("Ready.\n"); not working :(
-    
     USART0_sendString("Ready.\r\n");
 }
 

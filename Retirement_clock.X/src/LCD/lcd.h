@@ -7,7 +7,7 @@
 #define ENABLE_PIN 3
 
 /**
- * Rotatable LCD views
+ * All possible LCD views
  */
 typedef enum 
 {
@@ -18,7 +18,7 @@ typedef enum
 } LCD_views;
 
 /**
- * The active view
+ * The active LCD view
  */
 LCD_views LCD_view;
 
@@ -41,4 +41,4 @@ void LCD_update_view(void);
 /**
  * Rotate LCD-view
  */
-void LCD_rotate_views(void);
+void LCD_rotate_view(void);

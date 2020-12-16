@@ -22,7 +22,7 @@
 #include "DATE/date.h"
 #include "RTC/rtc.h"
 
-int exec(char *cmd);
+uint8_t exec(char *cmd);
 
 int main(void) 
 {     
@@ -43,35 +43,42 @@ int main(void)
         c = USART0_readChar(); // Read serial user interface char by char
         switch (c)
         {
-        	// TODO handle arrows here ?
-            case 127:
+        	case 127:
                 // Backspace
-                command[--index] = '\0';
+                index -= index < 1 ? 0 : 1;
+                command[index] = '\0';
+                USART0_sendChar(127); // Show the char 
                 break;
+            case '\n':
             case '\r':
-                // Carriage return
+                // Carriage return or new line
                 command[index] = '\0';
                 index = 0;
                 USART0_sendString("\r\n");
                 exit_code = exec(command);
                 break;
             default:
-                command[index++] = c;
+                if((32 <= c) && (c <= 126))
+                {
+                    command[index++] = c;
+                    USART0_sendChar(c); // Show the char        
+                }
                 if(index > MAX_COMMAND_LEN)
                 {
                     index = 0;
                 }
-        } 
-        USART0_sendChar(c); // Show the char        
+        }         
         if(exit_code != 0)
         {
-            USART0_sendString("Invalid command\r\n");
+            char error_msg[100];
+            snprintf(error_msg, sizeof(error_msg), "Invalid command: %s\r\n", command);
+            USART0_sendString(error_msg);
             exit_code = 0;
         }
     }
 }
 
-int exec(char *cmd)
+uint8_t exec(char *cmd)
 {    
     // Parse command
     char args[16][32];
@@ -80,7 +87,7 @@ int exec(char *cmd)
     uint8_t ctr = 0;
     for(i = 0; i <= (strlen(cmd)); i++)
     {
-        // if space or NULL found, assign NULL into args[ctr]
+        // If space or NULL found, assign NULL into args[ctr]
         if((cmd[i] == ' ') || (cmd[i] == '\0'))
         {
             args[ctr][j] = '\0';
@@ -118,7 +125,7 @@ int exec(char *cmd)
         if(strcmp(args[0], "SET") == 0)
         {
             int16_t duration = atoi(args[2]);
-            backlight_duration = duration > 0 ? duration : 5;
+            RTC_set_bl_duration(duration < 0 ? 5 : duration);
             return 0;
         }
     }

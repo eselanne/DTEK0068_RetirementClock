@@ -29,14 +29,14 @@ void LCD_init()
     _delay_ms(10);
     LCD_send_command(0x06); // Increment cursor
     
-    // Possible values: CLOCK_VIEW, COUNTDOWN_VIEW and UPTIME_VIEW
+    // Possible values: CLOCK_VIEW, COUNTDOWN_VIEW, UPTIME_VIEW and
+    // RETIREMENT_VIEW
     LCD_view = UPTIME_VIEW;
     
-    // Init backlight
+    // Backlight
     PORTF.DIRSET = PIN2_bm;
-    //PORTF.OUTCLR = PIN2_bm; // Off
-    PORTF.OUTSET = PIN2_bm; // On
-
+    PORTF.OUTCLR = PIN2_bm; // Off
+    //PORTF.OUTSET = PIN2_bm; // On
 }
 
 void LCD_send_command(unsigned char cmnd)
@@ -67,7 +67,6 @@ void LCD_goto(unsigned char y, unsigned char x)
 {
     unsigned char firstAddress[] = {0x80,0xC0,0x94,0xD4};
     LCD_send_command(firstAddress[y-1] + x-1);
-    //_delay_ms(2);
 }
 
 void LCD_print(char *string)
@@ -86,9 +85,8 @@ void LCD_clear(void)
 
 void LCD_update_view()
 {
-    // TODO
-    char row1_str[1000];
-    char row2_str[1000];
+    char row1_str[17];
+    char row2_str[17];
     switch (LCD_view)
     {
         case CLOCK_VIEW:
@@ -110,9 +108,6 @@ void LCD_update_view()
             strcpy(row1_str, "Go home,");
             strcpy(row2_str, "old-timer!");
             break;
-            
-            
-            
     }
     // Calculate starting indexes
     uint8_t row1_index = ((16 - strlen(row1_str)) / 2) + 1;
@@ -125,9 +120,9 @@ void LCD_update_view()
     LCD_print(row2_str);
 }
 
-// rotate views
-// if is_retired == 1, View 3 wont show up
-void LCD_rotate_views () {
+// Rotate views
+// If is_retired == 1, View 3 wont show up
+void LCD_rotate_view() {
     LCD_view++;
     if (LCD_view >= 3) 
     {

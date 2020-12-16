@@ -13,28 +13,28 @@
 volatile struct tm timeinfo;  // Datetime
 volatile struct tm b_timeinfo;  // Birth date
 volatile struct tm r_timeinfo; // Retirement date
-volatile uint32_t uptime_sec = 0; // Uptime
-volatile uint32_t time_to_ret_sec; // Uptime
+volatile uint32_t uptime_sec = 0; // Uptime in seconds
+volatile uint32_t time_to_ret_sec; // Time to retirement in seconds
 volatile uint8_t is_retired = 0; // 0 = not retired, 1 = yes retired
 
 void DATE_init()
 {    
     cli();
     // Init datetime
-    timeinfo.tm_sec = 40;
-    timeinfo.tm_min = 59;
-    timeinfo.tm_hour = 23;
-    timeinfo.tm_mday = 3;
-    timeinfo.tm_mon = 3 - 1;
+    timeinfo.tm_sec = 0;
+    timeinfo.tm_min = 0;
+    timeinfo.tm_hour = 12;
+    timeinfo.tm_mday = 21;
+    timeinfo.tm_mon = 12 - 1;
     timeinfo.tm_year = 2020 - 1900;
     // Init birth date
-    b_timeinfo.tm_sec = 0;
-    b_timeinfo.tm_min = 0;
-    b_timeinfo.tm_hour = 0;
-    b_timeinfo.tm_mday = 4;
-    b_timeinfo.tm_mon = 3 - 1;
+    b_timeinfo.tm_sec = 30;
+    b_timeinfo.tm_min = 59;
+    b_timeinfo.tm_hour = 23;
+    b_timeinfo.tm_mday = 20;
+    b_timeinfo.tm_mon = 12 - 1;
     b_timeinfo.tm_year = 1955 - 1900;
-    // Init retirement
+    // Init retirement (birth date + RET_AGE)
     DATE_update_ret_date();    
     sei();
 }
@@ -63,7 +63,7 @@ void DATE_incr_one_sec()
     }
     
     // Handle month day overflow
-    if(timeinfo.tm_mon + 1 == 2) // Is February
+    if((timeinfo.tm_mon + 1) == 2) // Is February
     {
         if(is_leap_year(timeinfo.tm_year + 1900))
         {
@@ -105,22 +105,23 @@ void DATE_incr_one_sec()
     // Handle month overflow
     if((timeinfo.tm_mon + 1) > 12)
     {
-        // January first day
+        // Set January first day
         timeinfo.tm_mday = 1;
-        timeinfo.tm_mon = 0;
+        timeinfo.tm_mon = 1 - 1;
         timeinfo.tm_year++;
     }
-    //Activate buzzer and change retirement view
-    if (time_to_ret_sec == 0 && is_retired == 0)
+    
+    // Activate buzzer and change to retirement view
+    if ((time_to_ret_sec == 0) && !is_retired)
     {
         is_retired = 1;
         PORTC.OUTSET = PIN4_bm;
-        LCD_view = 4;
+        LCD_view = RETIREMENT_VIEW;
     }
     sei();
 }
 
-int DATE_handle_date_cmd(char *method, char *type, char *date, char *time)
+uint8_t DATE_handle_date_cmd(char *method, char *type, char *date, char *time)
 {
     struct tm *selected_tm;
     if(strcmp(type, "DATETIME") == 0)
@@ -154,7 +155,8 @@ int DATE_handle_date_cmd(char *method, char *type, char *date, char *time)
             return 1;
         }
         DATE_update_date(date, time, selected_tm);
-        DATE_update_ret_date();     
+        DATE_update_ret_date();
+        is_retired = time_to_ret_sec < 1;
         return 0;
     }
     return 1;
@@ -162,41 +164,41 @@ int DATE_handle_date_cmd(char *method, char *type, char *date, char *time)
 
 void DATE_update_date(char date[], char time[], struct tm *selected_tm)
 {
-    char* year_c = malloc(4);
-    char* month_c = malloc(2);
-    char* day_c = malloc(2);
-    char* hour_c = malloc(2);
-    char* min_c = malloc(2);
-    char* sec_c = malloc(2);
-    strncpy(year_c, date + 6, 4);
-    strncpy(month_c, date + 3, 2);
-    strncpy(day_c, date, 2);
-    strncpy(hour_c, time, 2);
-    strncpy(min_c, time + 3, 2);
-    strncpy(sec_c, time + 6, 2);
+    char* year_str = malloc(4);
+    char* month_str = malloc(2);
+    char* day_str = malloc(2);
+    char* hour_str = malloc(2);
+    char* min_str = malloc(2);
+    char* sec_str = malloc(2);
+    strncpy(year_str, date + 6, 4);
+    strncpy(month_str, date + 3, 2);
+    strncpy(day_str, date, 2);
+    strncpy(hour_str, time, 2);
+    strncpy(min_str, time + 3, 2);
+    strncpy(sec_str, time + 6, 2);
     cli();
-    selected_tm->tm_sec = atoi(sec_c);
-    selected_tm->tm_min = atoi(min_c);
-    selected_tm->tm_hour = atoi(hour_c);
-    selected_tm->tm_mday = atoi(day_c);
-    selected_tm->tm_mon = atoi(month_c) - 1;
-    selected_tm->tm_year = atoi(year_c) - 1900;
+    selected_tm->tm_sec = atoi(sec_str);
+    selected_tm->tm_min = atoi(min_str);
+    selected_tm->tm_hour = atoi(hour_str);
+    selected_tm->tm_mday = atoi(day_str);
+    selected_tm->tm_mon = atoi(month_str) - 1;
+    selected_tm->tm_year = atoi(year_str) - 1900;
     sei();
 }
 
-int DATE_is_valid_date(char date[])
+uint8_t DATE_is_valid_date(char date[])
 {
-    char* year_c = malloc(4);
-    char* month_c = malloc(2);
-    char* day_c = malloc(2);
-    strncpy(year_c, date + 6, 4);
-    strncpy(month_c, date + 3, 2);
-    strncpy(day_c, date, 2);
-    uint16_t year = atoi(year_c);
-    uint8_t month = atoi(month_c);
-    uint8_t day = atoi(day_c);
+    char* year_str = malloc(4);
+    char* month_str = malloc(2);
+    char* day_str = malloc(2);
+    strncpy(year_str, date + 6, 4);
+    strncpy(month_str, date + 3, 2);
+    strncpy(day_str, date, 2);
+    uint16_t year = atoi(year_str);
+    uint8_t month = atoi(month_str);
+    uint8_t day = atoi(day_str);
 
-    //check range of year,month and day
+    // Check range of year, month and day
     if ((year > MAX_YR) || (year < MIN_YR))
     {
         return 0;
@@ -210,7 +212,7 @@ int DATE_is_valid_date(char date[])
         return 0;
     }
 
-    //Handle feb days in leap year
+    // Handle Feb days in leap year
     if (month == 2)
     {
         if (is_leap_year(year))
@@ -220,7 +222,7 @@ int DATE_is_valid_date(char date[])
         return (day <= 28);
     }
     
-    //handle months which has only 30 days
+    // Handle months w/ 30 days
     if ((month == 4) || (month == 6) ||
             (month == 9) || (month == 11))
     {
@@ -229,17 +231,17 @@ int DATE_is_valid_date(char date[])
     return 1;
 }
 
-int DATE_is_valid_time(char time[])
+uint8_t DATE_is_valid_time(char time[])
 {
-    char* hour_c = malloc(2);
-    char* min_c = malloc(2);
-    char* sec_c = malloc(2);
-    strncpy(hour_c, time, 2);
-    strncpy(min_c, time + 3, 2);
-    strncpy(sec_c, time + 6, 2);
-    uint8_t hour = atoi(hour_c);
-    uint8_t min = atoi(min_c);
-    uint8_t sec = atoi(sec_c);
+    char* hour_str = malloc(2);
+    char* min_str = malloc(2);
+    char* sec_str = malloc(2);
+    strncpy(hour_str, time, 2);
+    strncpy(min_str, time + 3, 2);
+    strncpy(sec_str, time + 6, 2);
+    uint8_t hour = atoi(hour_str);
+    uint8_t min = atoi(min_str);
+    uint8_t sec = atoi(sec_str);
     if(!((0 <= hour) && (hour <= 23)))
     {
         return 0;
@@ -268,9 +270,9 @@ void DATE_get_uptime(char *dest)
 
 void DATE_calc_ret_date(struct tm *dest_tm)
 {
-    dest_tm->tm_sec = /*b_timeinfo.tm_sec*/ 0;
-    dest_tm->tm_min = /*b_timeinfo.tm_min*/ 0;
-    dest_tm->tm_hour = /*b_timeinfo.tm_hour*/ 0;
+    dest_tm->tm_sec = 0;
+    dest_tm->tm_min = 0;
+    dest_tm->tm_hour = 0;
     dest_tm->tm_mday = b_timeinfo.tm_mday;
     dest_tm->tm_mon = b_timeinfo.tm_mon;
     dest_tm->tm_year = b_timeinfo.tm_year + RET_AGE;
@@ -308,8 +310,7 @@ uint32_t DATE_diff_in_seconds(struct tm *start, struct tm *end)
         uint8_t is_last_year = year == (end->tm_year + 1900);
         uint8_t month = is_first_year ? (start->tm_mon + 1) : 1;
         uint8_t last_month = is_last_year ? (end->tm_mon + 1) : 12;
-        // Loop "full" months in a year
-        // First month is most likely not full, so it's an exception
+        // Loop months
         for(; month <= last_month; month++)
         {
             uint8_t days_in_month = 31;
